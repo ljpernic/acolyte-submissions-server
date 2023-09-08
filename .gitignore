@@ -1,0 +1,4 @@
+## Things that won't get pushed to git are listed here.
+
+/node_modules
+.env
