@@ -4,8 +4,8 @@ const RoleSchema = new mongoose.Schema(
   {
     role: {                                                                   // This property is internal and manipulated by the reader.
       type: String,
-      enum: ['chiefEditor', 'assistantEditor', 'associateEditor', 'reader'],           // Sets an array with possible values.
-      default: 'reader',                                                       // Sets the default value.
+      enum: ['EIC', 'assistantEditor', 'associateEditor', 'reader'],           // Sets an array with possible values.
+      default: 'EIC',                                                       // Sets the default value.
     },
   },
 )

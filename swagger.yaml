@@ -11,7 +11,7 @@ paths:
     post:
       tags:
         - Auth
-      summary: Add Reader
+      summary: To delegate submissions to other readers.
       operationId: Delegate
       parameters: []
       requestBody:

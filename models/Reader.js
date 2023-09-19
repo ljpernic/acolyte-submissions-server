@@ -32,8 +32,8 @@ const ReaderSchema = new mongoose.Schema({                                      
     default: true,                                                       // Sets the default value.
   },
   role: {
-    type: mongoose.Schema.Types.ObjectId,                                            //// it associates it with a reader. 
-    ref: 'Role',                                                            //// This is the other model it will use as a reference. From the auth middleware?
+    type: String,                                            //// it associates it with a reader. 
+    enum: ['EIC', 'assistantEditor', 'associateEditor', 'undeterminedEditor'],          //// This is the other model it will use as a reference. From the auth middleware?
     required: [true, 'Please provide role. '],
   },
   weekCount: {
@@ -50,13 +50,6 @@ const ReaderSchema = new mongoose.Schema({                                      
     type: Number,
     default: 0,
     required: [true, "The total count for this reader isn't showing up. "],
-  },
-  monthCount: {
-    type: String,
-    default: "",
-    required: [true, 'The month tracking is not working. '],
-    maxlength: 10,
-    minlength: 3,
   },
 })
 

@@ -7,10 +7,10 @@ const jwt = require('jsonwebtoken')                                             
 
 // REGISTRATION FUNCTION  -- SHOULD ONLY BE AVAILABLE TO TOP LEVEL EDITOR // 
 const delegate = async (req, res) => {                                                 // Creates asynchronous function called "delegate" which 
-//  console.log(`delegate function, controllers/auth.js, req.body: ` + req.body)
   const reader = await Reader.create({ ...req.body })                                   //// creates a 'delegate' with Delegate data passed in from req.body, then
-
+//  console.log("New reader created with these details: " + reader)
   const newEmail = reader.email
+  // console.log('newEmail: ' + newEmail)
   const readerExists = await Reader.findOne({ newEmail })
 //  console.log(`delegate function, controllers/auth.js, reader exists? ` + readerExists)
   if (readerExists) {                                                                   //// And if there isn't one, it throws an error saying the delegate wasn't found.
@@ -31,9 +31,12 @@ const delegate = async (req, res) => {                                          
   )                                                                                     //// creates a unique JWT token based on that delegate data and
   res.status(StatusCodes.CREATED).json({ reader: { name: reader.name }, token })        //// responds with a statuscode based on reader/token data, the reader name and the token.
 }                                                                                       // THIS IS WHERE THE TOKEN CONFIRMATION GOES INSTEAD OF THE READER MODEL?
-
-
-
+//
+//
+//
+//
+//
+//
 // LOGIN FUNCTION -- SHOULD BE AVAILABLE TO ALL EDITORS AND READERS //
 const login = async (req, res) => {                                                     // Function that creates 'email' and 'password' constants with the data
   const { email, password } = req.body                                                  //// passed in from req.body.
@@ -69,6 +72,4 @@ const login = async (req, res) => {                                             
 module.exports = {                                                                      // Exports the registration and login functions so that they are 
   delegate,                                                                            //// available everywhere.
   login,
-
-  // isAssistantEditor
 }

@@ -15,7 +15,7 @@ apiKey.apiKey = process.env.EMAIL_KEY
 const createSubmitted = async (req, res) => {
   const submitted = await Submissions.create(req.body)                       // Creates submission array using Role/Submission.js scheme. )
   const submission = submitted;
-  console.log(`Is this invoked? ` + JSON.stringify(req.body))
+//  console.log(`Is this invoked? ` + JSON.stringify(req.body))
   const tranEmailApi = new Sib.TransactionalEmailsApi()
 
   // SET UP DEADLINE PART OF EMAIL

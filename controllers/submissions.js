@@ -1,6 +1,7 @@
 // TO DO: Organize the controllers so that emails are separated out and this file isn't a million miles long
 
 const Submissions = require('../models/Submissions')                                    // Makes available the schema defined in models/Submissions.js
+const Reader = require('../models/Reader')                                    // Makes available the schema defined in models/Reader.js
 const { StatusCodes } = require('http-status-codes')                                    // Makes easy status codes from http-status-code package available.
 const { BadRequestError, UnauthenticatedError } = require('../errors')                  // Makes these extra errors available.
 const fs = require('fs');
@@ -25,15 +26,21 @@ const getAllSubmissionsStatic = async (req, res) => {                           
   const submissions = await Submissions.find({})                                         // Uses the .find function to find all submissions
   res.status(StatusCodes.OK).json({ submissions, count: submissions.length })           // Returns submissions and # of submissions, which is needed on the front end.
 }
-
-// FUNCTION TO GET ALL SUBISSIONS FOR A PARTICULAR READER //
+//
+//
+//
+//
+// FUNCTION TO GET ALL SUBMISSIONS FOR A PARTICULAR READER //
 const getAllSubmissions = async (req, res) => {
   const submissions = await Submissions.find({ reader: req.reader.readerId }).sort('createdAt')   // Finds all submissions by signed-in readerId and sorts.
 //  console.log(`server/controllers/submissions.js, getAllSubmissions, req.reader: ` + JSON.stringify(req.reader))
 //  console.log(`server/controllers/submissions.js, getAllSubmissions, const submissions: ` + submissions)
   res.status(StatusCodes.OK).json({ submissions, count: submissions.length })                       // Returns submissions and # of submissions, which is needed on the front end.
 }
-
+//
+//
+//
+//
 // FUNCTION TO GET SPECIFIC SUBMISSION //
 const getSubmission = async (req, res) => {
   const {
@@ -50,7 +57,10 @@ const getSubmission = async (req, res) => {
 //  console.log(`controllers/submissions.js, getSubmission: ` + submission)
   res.status(StatusCodes.OK).json({ submission })                                            // Otherwise, returns the submission.
 }
-
+//
+//
+//
+//
 // FUNCTION TO DELETE SPECIFIC SUBMISSION //
 const deleteSubmission = async (req, res) => {
   const {
@@ -67,13 +77,11 @@ const deleteSubmission = async (req, res) => {
 //  console.log(`server/controllers/submissions.js, deleteSubmission, submission: ` + submission)
   res.status(StatusCodes.OK).send()
 }
-
 ////////
 ////////
 //////// UPDATING AND EMAILING FUNCTION ////////
 //////// 
 //////// 
-
 // FUNCTION TO UPDATE SPECIFIC SUBMISSION //
 const updateSubmission = async (req, res) => {
 
@@ -85,7 +93,7 @@ const updateSubmission = async (req, res) => {
  
   //////// SEARCHES DATABASE FOR SUBMISSION BASED ON REQ PARAMETERS
   //////// SETS REJECTION STATUS FROM REQ.BODY IF APPLICABLE 
-  const submission = await Submissions.findByIdAndUpdate(                                            //// Otherwise, finds and updates submission by submissionId and readerId.
+  const submission = await Submissions.findByIdAndUpdate(                            //// Otherwise, finds and updates submission by submissionId and readerId.
     { _id: submissionId, reader: readerId },
     req.body,
     { new: true, runValidators: true }
@@ -139,24 +147,40 @@ if (submission.type === 'fiction') {
 
   if ( submission.active === true ) {
 
+    const readerEntry = await Reader.findOne({                                      // Looks for specific submission based on those req values.
+      _id: submission.reader,
+    })
+    if (!readerEntry) {                                                                         // If it can't find the submission, it throws an error.
+      throw new NotFoundError(`No readerEntry with id ${submission.reader}`)
+    }
+    var readerName = readerEntry.name;
+    
+    if (readerEntry.role === 'EIC') {
+      var readerRole = 'Editor'
+    } else if (readerEntry.role === 'assistantEditor') {
+      var readerRole = 'Assistant Editor'
+    } else if (readerEntry.role === 'associateEditor') {
+      var readerRole = 'Associate Editor'
+    } else {
+      var readerRole = ''
+    }
+
   //////// 
   //////// TOP-TIER REJECTION FUNCTIONALITY AND EMAIL ////////
   //////// 
 
     if ( submission.status === "Rejected, Third Round") {
       await Submissions.updateOne( {"_id":submission._id}, {$set: {"active":false}} )
-
-      console.log(`Top-tier reciever's email: ` + submitterRecievers)
-
       const otherEmailApi = new Sib.TransactionalEmailsApi()
-      // TO DO: Change "fiction" to "short fiction" so that it is easy to include in the parameters of the emails.
-            // SEND EMAIL
+    console.log("readerName: " + readerName) 
+    console.log("readerRole: " + readerRole)     
       otherEmailApi.sendTransacEmail({
         sender, 
         to: submitterRecievers,
         subject: 'Re: Submission to Haven Spec Magazine',
         params: {
-          name: submission.name,
+          name: readerName,
+          role: readerRole,
           title: submission.title,
           type: submissionType,
           readerNote: submission.readerNote,
@@ -170,7 +194,7 @@ if (submission.type === 'fiction') {
         <p> {{params.readerNote}} That's just our subjective opinion, of course, but we appreciated the chance to look at your work, and we 
         hope you send us more. </p>
         <p> Sincerely,</p>
-        <p> Name to come...</p>
+        <p> {{params.name}}, {{params.role}} <br /> Haven Spec Magazine</p>
         <br />
         Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a> and on 
         Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>.</p>
@@ -190,18 +214,16 @@ if (submission.type === 'fiction') {
 
     else if ( submission.status === "Rejected, Second Round") {
       await Submissions.updateOne( {"_id":submission._id}, {$set: {"active":false}} )
-
-      console.log(`Middle-tier reciever's email: ` + submitterRecievers)
-
+      console.log("readerName: " + readerName) 
+      console.log("readerRole: " + readerRole)       
       const otherEmailApi = new Sib.TransactionalEmailsApi()
-      // TO DO: Change "fiction" to "short fiction" so that it is easy to include in the parameters of the emails.
-            // SEND EMAIL
       otherEmailApi.sendTransacEmail({
         sender, 
         to: submitterRecievers,
         subject: 'Re: Submission to Haven Spec Magazine',
         params: {
-          name: submission.name,
+          name: readerName,
+          role: readerRole,
           title: submission.title,
           type: submissionType,
         },
@@ -212,7 +234,7 @@ if (submission.type === 'fiction') {
         pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything 
         else you might write!</p> 
         <p> Sincerely,</p>
-        <p> Name to come...</p>
+        <p> {{params.name}}, {{params.role}} <br /> Haven Spec Magazine</p>
         <br />
         Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a> and on 
         Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>.</p>
@@ -232,9 +254,8 @@ if (submission.type === 'fiction') {
 
   else if ( submission.status === "Rejected, First Round") {
     await Submissions.updateOne( {"_id":submission._id}, {$set: {"active":false}} )
-
-    console.log(`First-tier reciever's email: ` + submitterRecievers)
-
+    console.log("readerName: " + readerName) 
+    console.log("readerRole: " + readerRole)     
     const otherEmailApi = new Sib.TransactionalEmailsApi()
     // TO DO: Change "fiction" to "short fiction" so that it is easy to include in the parameters of the emails.
           // SEND EMAIL
@@ -243,7 +264,8 @@ if (submission.type === 'fiction') {
       to: submitterRecievers,
       subject: 'Re: Submission to Haven Spec Magazine',
       params: {
-        name: submission.name,
+        name: readerName,
+        role: readerRole,
         title: submission.title,
         type: submissionType,
       },
@@ -253,7 +275,7 @@ if (submission.type === 'fiction') {
       <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to 
       pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p> 
       <p> Sincerely,</p>
-      <p> Name to come...</p>
+      <p> {{params.name}}, {{params.role}} <br /> Haven Spec Magazine</p>
       <br />
       Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a> and on 
       Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>.</p>
@@ -274,9 +296,9 @@ if (submission.type === 'fiction') {
   // TO DO: Split this into two emails so that the reader notes are sent to the editor immediatly?
   else if ( submission.status === "Rejected Anonymously") {
     await Submissions.updateOne( {"_id":submission._id}, {$set: {"active":false}} )
-
+    console.log("readerName: " + readerName) 
+    console.log("readerRole: " + readerRole)     
     console.log(`Anonymous recievers' emails: ` + submitterRecievers)
-
     const otherEmailApi = new Sib.TransactionalEmailsApi()
           // SEND EMAIL
     otherEmailApi.sendTransacEmail({
@@ -284,7 +306,8 @@ if (submission.type === 'fiction') {
       to: submitterRecievers,
       subject: 'Re: Submission to Haven Spec Magazine',
       params: {
-        name: submission.name,
+        name: readerName,
+        role: readerRole,
         title: submission.title,
         type: submissionType,
       },
@@ -294,7 +317,7 @@ if (submission.type === 'fiction') {
       <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to 
       pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p> 
       <p> Sincerely,</p>
-      <p> The Editorial Team</p>
+      <p> The Editorial Team <br /> Haven Spec Magazine</p>      
       <br />
       Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a> and on 
       Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>.</p>
@@ -340,9 +363,6 @@ if (submission.type === 'fiction') {
   //////// 
 
   else if ( submission.status === "Recommended") {
-
-//    console.log(`Recommended recievers' emails: ` + sender)
-
     const otherEmailApi = new Sib.TransactionalEmailsApi()
           // SEND EMAIL
     otherEmailApi.sendTransacEmail({
@@ -350,7 +370,8 @@ if (submission.type === 'fiction') {
       to: recommendationRecievers,
       subject: 'Reader Recommendation',
       params: {
-        name: submission.name,
+        name: readerName,
+        role: readerRole,
         title: submission.title,
         type: submissionType,
         readerNote: submission.readerNote,
@@ -358,17 +379,18 @@ if (submission.type === 'fiction') {
       htmlContent:`
       <h4>Haven Spec Magazine</h4> 
       <p><strong>Recommendation: </strong></p>
-      <p>Title: {{params.title}}</p>
-      <p>Name: {{params.title}}</p>
-      <p>Type: {{params.type}}</p>
+      <p><strong>Title:</strong> {{params.title}}</p>
+      <p><strong>Name:</strong> {{params.title}}</p>
+      <p><strong>Type:</strong> {{params.type}}</p>
       <br />
-      <p>Recommended by: name to come...</p>
-      <p>readerNote: {{params.readerNote}}</p>
+      <p><strong>Recommended by:</strong> <br /> {{params.name}}, {{params.role}}</p>
+      <p><strong>readerNote:</strong> <br /> {{params.readerNote}}</p>
       `
     }).then(console.log)
-
-    // TO DO: HOLD NOTICE BELOW ISN'T SENDING TO SUBMITTER.
-    // Check online for a guide how to send to emails back to back.
+//
+//
+//
+//
     const holdEmailApi = new Sib.TransactionalEmailsApi()
           // SEND EMAIL
     holdEmailApi.sendTransacEmail({
@@ -385,7 +407,7 @@ if (submission.type === 'fiction') {
       <h4>Haven Spec Magazine</h4> 
       <p> Dear {{params.name}},
       <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. This is just a quick note to say we've 
-      decided to hold onto this one for further consideration... </p> 
+      decided to hold onto this one for further consideration, but you should hear from us again in the next month or two. </p> 
       <p> Sincerely,</p>
       <p> Reader name to come... </p>
       <br />
@@ -400,19 +422,17 @@ if (submission.type === 'fiction') {
 
     res.status(StatusCodes.OK).json({ submission })
   }
-
     //////// IF ACTIVE BUT NOT REJECTED, UPDATES THE FILE AS NORMAL.
-    
     else {
-      console.log("Submission.status: " + submission)
-      console.log("UPDATE ENTRY --> Entry has no rejected status")
+//      console.log("Submission.status: " + submission)
+//      console.log("UPDATE ENTRY --> Entry has no rejected status")
       res.status(StatusCodes.OK).json({ submission })
     }    
   }
   //////// ELSE IF THE SUBMISSION IS NOT ACTIVE, DO NOTHING.
   else {
-      console.log("Submission.status: " + submission.status)
-      console.log("DO NOTHING --> Entry has status:rejected and active:false)")
+//      console.log("Submission.status: " + submission.status)
+//      console.log("DO NOTHING --> Entry has status:rejected and active:false)")
       res.status(StatusCodes.NOT_MODIFIED).json({ submission })
     } 
   } 
