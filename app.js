@@ -19,14 +19,9 @@ const swaggerDocument = YAML.load('./swagger.yaml');
 const express = require('express');                                             // Makes the express package available for use in this file.
 const app = express();                                                          // Assigns the express function specifically to the 'app' constant.
 
-// // VIEW ENGINE SETUP
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
-
 // DATABASE AND AUTHENTICATION SETUP
 const connectDB = require('./db/connect');                                      // Makes the database info in db/connect available.
 const authReader = require('./middleware/authentication');                      // Makes the authentication middleware available.
-                                                                                ////
                                                                                 ////
 // ROUTERS
 const submittedRouter = require('./routes/submitted');                                // Makes controllers from controllers/submit.js that are paired with routes in app.js available
@@ -46,17 +41,25 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  // Disable caching headers
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+const corsOrigin ={
+  origin:'http://localhost:3000',                                               // 
+  credentials:true,            
+  optionSuccessStatus:200
+}
+
 // INVOKES THE SECURITY PACKAGES REQUIRED ABOVE // 
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+app.use(cors(corsOrigin));
 app.use(xss());
-
-// // DUMMY ROUTE //
-// app.get('/', (req, res) => {
-//   res.send('<h1>Submissions API</h1><a href="/api-docs">Documentation</a>');           // Dummy get route to make sure everything deployed right. 
-// });
-// app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // ROUTES //
 app.use('/api/v1/submitted', submittedRouter);                                    // Where the req.body shows itself; second thing is the routes file required above

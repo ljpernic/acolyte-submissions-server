@@ -36,20 +36,20 @@ const createSubmitted = async (req, res) => {
     }
   // SET UP EMAIL DETAILS
   const sender = {
-    email: 'havenspec@gmail.com',
+    email: 'editor@havenspec.com',
     name: 'Haven Spec Magazine'
   }
 
-  const recievers = [
+  const receivers = [
     {
-      email: 'leon.perniciaro@gmail.com',
+      email: 'editor@havenspec.com',
     },
   ]
 
 // SEND EMAIL
 tranEmailApi.sendTransacEmail({
   sender, 
-  to: recievers,
+  to: receivers,
   subject: 'Thank you for your submission to Haven Spec Magazine',
   params: {
     name: req.body.name,

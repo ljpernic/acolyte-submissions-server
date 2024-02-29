@@ -8,13 +8,16 @@ const {                                                                         
   getAllSubmissionsStatic,
   getAllSubmissions,
   getSubmission,
-  updateSubmission,                                                                           // Paired with verarbeiten functionality
+  updateSubmission,
+  updateReader,                                                                           // Paired with verarbeiten functionality
   deleteSubmission,
 } = require('../controllers/submissions')
+
 
 router.route('/').get(getAllSubmissions)                                                      // the '/' is effectively the root path when it's called in app.js, i.e.,
 router.route('/static').get(getAllSubmissionsStatic)                                          //// api/v1/submissions/, with /static being added onto it for this method.
 router.route('/:id').get(getSubmission).patch(updateSubmission).delete(deleteSubmission)      //// Basically, these assign controller functions imported from 
-                                                                                              //// and use the given controller inside the given route.
+router.route('/claim/:id').get(getSubmission).patch(updateReader)                             //// and use the given controller inside the given route.
+router.route('/unclaim/:id').get(getSubmission).patch(updateReader)                             //// and use the given controller inside the given route.
 
 module.exports = router                                                                       // Makes the router available for other files.

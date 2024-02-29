@@ -23,13 +23,20 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
     },
     type: {
       type: String,
+      enum: {
+        values: ['fiction', 'poetry', 'non-fiction', 'art'], // Add any other allowed values for the 'type' field
+        message: '{VALUE} is not supported',
+      },
       required: [true, 'Please choose a type'],
     },
     wordCount: {
       type: Number,
-      required: [true, 'Numbers only please'],
+      required: function () {
+        return this.type === 'fiction'; // Require wordCount only if type is 'fiction'
+      },
       trim: true,
-      maxlength: [4, 'Max story length is 6000 words'],
+      min: [1, 'Word count cannot be negative'],
+      max: [6000, 'Max story length is 6000 words'],
     },
     file: {
       type: Buffer,
@@ -43,7 +50,7 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
     },
     reader: {
       type: String,
-      default: '6376e1589393531e1010d1b6',                                // As bananas are added, they won't have a reader by default
+      default: 'unclaimed',                                // As bananas are added, they won't have a reader by default
       required: [true],
     },
     readerNote: {
@@ -87,7 +94,7 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
 
  SubmissionSchema.pre('save', async function () { 
    const allReaders = await Reader.find()
-    console.log('allReaders: ' + allReaders)
+//    console.log('allReaders: ' + allReaders)
  })
 
 // // ////// FUNCTION TO GET AND ASSIGN ACTIVE READERS //////
