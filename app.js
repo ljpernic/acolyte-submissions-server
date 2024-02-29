@@ -68,7 +68,10 @@ app.use('/api/v1/auth', authRouter);                                            
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 5000;
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
 
 const start = async () => {
   try {
