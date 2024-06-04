@@ -1,6 +1,7 @@
 //////// SERVER-SIDE FUNCTIONS FOR REGISTERING NEW USERS AND LOGGING IN //////
 
 const Reader = require('../models/Reader.js')                                           // Makes the schema and functions defined in /models/Reader available in const Reader.
+const bcrypt = require('bcryptjs');
 const { StatusCodes } = require('http-status-codes')                                    // Makes easy status codes from http-status-code package available.
 const { BadRequestError, UnauthenticatedError } = require('../errors')                  // Makes these extra errors available.
 const jwt = require('jsonwebtoken')                                                     // Makes jwt package available for creating json web tokens. 
@@ -42,67 +43,85 @@ const delegate = async (req, res) => {
 //
 //
 // LOGIN FUNCTION -- SHOULD BE AVAILABLE TO ALL EDITORS AND READERS //
-const login = async (req, res) => {                                                     // Function that creates 'email' and 'password' constants with the data
-  const { email, password } = req.body                                                  //// passed in from req.body.
-  if (!email || !password) {                                                            // If there's no email or password, 
-    throw new BadRequestError('Please provide an email and password! ')                 //// it throws an error. 
-  }
-  const reader = await Reader.findOne({ email })                                        // Otherwise, it looks for the reader that already has the given email.
- 
- if (!reader) {                                                                        //// And if there isn't one, it throws an error saying the reader wasn't found.
-    throw new UnauthenticatedError('Reader not found. ')
-  }
-  const isPasswordCorrect = await reader.comparePassword(password)                      // Uses comparePassword function in models/Readers.js to check the password.
-  if (!isPasswordCorrect) {                                                             //// If the password is not correct, 
-    throw new UnauthenticatedError('Invalid password. ')                                //// it throws an error.
-  }
-  const token = jwt.sign(                                                               //// This function is for creating web tokens.
-    { 
-      readerId: reader._id, 
-      name: reader.name,
-      role: reader.role 
-    },                                                                                  //// using reader.something to refer to the id and keypair values in the given document,
-      process.env.JWT_SECRET,                                                           //// mixing those values with the token key given in the hidden .env file.
-    {
-      expiresIn: '7d',                                              //// It also provides an expiration period based on what's in the .env file. 
-    }
-  )
-                                                                                      //// creates a unique JWT token based on that reader data and
-  res.status(StatusCodes.OK).json({ reader: { name: reader.name, readerId: reader._id}, token })            //// responds with a statuscode based on reader/token data, the reader name and the token.
-}                                                                                      
-//
-//
-//
-//
-const changePassword = async (req, res) => {
+const login = async (req, res) => {
   try {
-    const { email, currentPassword, newPassword } = req.body;
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw new BadRequestError('Please provide an email and password!');
+    }
 
-    // Find the reader with the provided email
     const reader = await Reader.findOne({ email });
-
-    // If the reader doesn't exist, return an error
     if (!reader) {
-      return res.status(StatusCodes.NOT_FOUND).json({ error: 'Reader not found.' });
+      throw new UnauthenticatedError('Reader not found.');
     }
 
-    // Verify the current password
-    const isPasswordCorrect = await reader.comparePassword(currentPassword);
+    const isPasswordCorrect = await reader.comparePassword(password);
 
-    // If the current password is incorrect, return an error
     if (!isPasswordCorrect) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Incorrect current password.' });
+      console.log('Password comparison failed');
+      throw new UnauthenticatedError('Invalid password.');
     }
 
-    // Update the password with the new one
-    reader.password = newPassword;
-    await reader.save();
+    // If the password is correct, proceed to generate and send the JWT token
+    const token = jwt.sign(
+      { 
+        readerId: reader._id, 
+        name: reader.name,
+        role: reader.role 
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '7d',
+      }
+    );
 
-    // Respond with a success message
+    res.status(StatusCodes.OK).json({ reader: { name: reader.name, readerId: reader._id }, token });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Please check the login details and try again.' });
+  }
+};                                                                                      
+//
+//
+//
+//
+const passwordChange = async (req, res) => {
+  try {
+    const { email: loggedInEmail, password: loggedInPassword, newPassword } = req.body;
+    // Validate inputs
+    if (!loggedInEmail || !loggedInPassword || !newPassword) {
+      throw new BadRequestError('All fields are required!');
+    }
+
+    // Find the logged-in user with the provided email
+    const loggedInReader = await Reader.findOne({ _id: req.reader.readerId });
+    if (!loggedInReader) {
+      throw new UnauthenticatedError('Reader not found.');
+    }
+
+    if (req.body.email !== loggedInReader.email) {
+      // If the email addresses don't match, it means someone is trying to change another user's password
+      console.log("Reader-submitted email does in fact DOES NOT equal email of loggedin reader")
+      throw new UnauthenticatedError('Unauthorized attempt to change password.');
+    }
+
+    // Verify the password of the logged-in user
+    const isPasswordCorrect = await loggedInReader.comparePassword(loggedInPassword);
+    if (!isPasswordCorrect) {
+      throw new UnauthenticatedError('The details are not correct.');
+    }
+
+    console.log("Reader-submitted email does in fact equal email of loggedin reader")
+
+    // Change the password for the logged-in user
+    loggedInReader.password = newPassword;
+    await loggedInReader.save();
+
+    // Respond with success message
     return res.status(StatusCodes.OK).json({ message: 'Password changed successfully.' });
   } catch (error) {
-    console.error(error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal Server Error' });
+    console.error('Internal Server Error:', error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Please check the password and email details and try again.' });
   }
 };
 //
@@ -112,5 +131,5 @@ const changePassword = async (req, res) => {
 module.exports = { 
   delegate,
   login,
-  changePassword,
+  passwordChange,
 }

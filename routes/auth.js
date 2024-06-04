@@ -5,12 +5,12 @@ const router = express.Router()                                 // Makes the rou
 const {
     delegate, 
     login,
-    changePassword,
+    passwordChange,
         } = require('../controllers/auth')
 
 // Lets us assign the post methods that invoke the controller function delegate.
 router.post('/delegate', delegate)                           
 router.post('/login', login)
-router.post('/change-password', changePassword);
+router.post('/change-password', passwordChange);
 
 module.exports = router                                         // Makes the router available everywhere.

@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 });
 
 const corsOrigin ={
-  origin:'http://localhost:3000',                                               // 
+  origin: 'http://localhost:3000', 
   credentials:true,            
   optionSuccessStatus:200
 }
@@ -65,12 +65,13 @@ app.use(xss());
 app.use('/api/v1/submitted', submittedRouter);                                    // Where the req.body shows itself; second thing is the routes file required above
 app.use('/api/v1/submissions', authReader, submissionsRouter);                                    // Where the req.body shows itself; second thing is the routes file required above
 app.use('/api/v1/auth', authRouter);                                            // Assigns the authRouter functions and post methods to this route.
+app.use('/api/v1/auth-pw', authReader, authRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 8000;
+  port = 5000;
 }
 
 const start = async () => {

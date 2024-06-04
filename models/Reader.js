@@ -60,8 +60,8 @@ ReaderSchema.pre('save', async function () {                                    
 })
 
 // COMPARES PASSWORDS BETWEEN SUBMITTED DATA AND DOCUMENT IN THE DB //
-ReaderSchema.methods.comparePassword = async function (canditatePassword) {     // Creates function called comparePassword with the methods instance using schemaName.methods.functionName.
-  const isMatch = await bcrypt.compare(canditatePassword, this.password)        // Uses the compare function of the bcrypt package to compare the candidatePassword that comes with a  
+ReaderSchema.methods.comparePassword = async function (candidatePassword) {     // Creates function called comparePassword with the methods instance using schemaName.methods.functionName.
+  const isMatch = await bcrypt.compare(candidatePassword, this.password)        // Uses the compare function of the bcrypt package to compare the candidatePassword that comes with a  
   return isMatch                                                                //// request and the password from the document already saved in the database. 
 }                                                                               //// Then it returns the match. 
 

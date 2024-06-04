@@ -19,21 +19,10 @@ const createSubmitted = async (req, res) => {
   const tranEmailApi = new Sib.TransactionalEmailsApi()
 
   // SET UP DEADLINE PART OF EMAIL
-  const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const month = ["March","April","May","June","July","August","September","October","November","December", "January", "February"];
   const currentDate = new Date();
-  let currentMonth = month[currentDate.getMonth()];
-  var deadlineMonth;
+  let deadlineMonth = month[currentDate.getMonth()];
 
-    if (currentMonth <= 10) 
-      {
-        deadlineMonth = currentMonth + 2;
-      } 
-    else if (currentMonth = 11)
-      {
-        deadlineMonth = month[1];
-      } else {
-        deadlineMonth = month[2];
-    }
   // SET UP EMAIL DETAILS
   const sender = {
     email: 'editor@havenspec.com',
@@ -42,7 +31,7 @@ const createSubmitted = async (req, res) => {
 
   const receivers = [
     {
-      email: 'editor@havenspec.com',
+      email: req.body.email,
     },
   ]
 
@@ -57,11 +46,19 @@ tranEmailApi.sendTransacEmail({
     deadline: deadlineMonth, 
   },
   htmlContent:`
-  <h4>Haven Spec Magazine</h4> 
-  <p> Dear {{params.name}},
-  <p>Thank you for submitting to Haven Spec Magazine! You should hear back 
-  from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
-  out at <a href="https://www.havenspec.com">havenspec.com</a> and on twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>!</p>
+  <p> 
+    Dear {{params.name}},
+  </p>
+  <p>
+    Thank you for submitting to Haven Spec Magazine. You should hear back 
+    from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
+    out at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and 
+    on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>!
+  </p>
+  <p> 
+    Sincerely, <br />
+    Haven Spec Magazine
+  </p>
   `
 }).then(console.log)
 .catch(console.log)
