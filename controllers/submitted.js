@@ -26,7 +26,7 @@ const createSubmitted = async (req, res) => {
   // SET UP EMAIL DETAILS
   const sender = {
     email: 'editor@havenspec.com',
-    name: 'Haven Spec Magazine'
+    name: 'Kaleidocast Magazine'
   }
 
   const receivers = [
@@ -39,7 +39,7 @@ const createSubmitted = async (req, res) => {
 tranEmailApi.sendTransacEmail({
   sender, 
   to: receivers,
-  subject: 'Thank you for your submission to Haven Spec Magazine',
+  subject: 'Thank you for your submission to Kaleidocast Magazine',
   params: {
     name: req.body.name,
     title: req.body.title,
@@ -50,14 +50,12 @@ tranEmailApi.sendTransacEmail({
     Dear {{params.name}},
   </p>
   <p>
-    Thank you for submitting to Haven Spec Magazine. You should hear back 
-    from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
-    out at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and 
-    on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>!
+    Thank you for submitting to Kaleidocast Magazine. You should hear 
+    from us again in the next few months.
   </p>
   <p> 
     Sincerely, <br />
-    Haven Spec Magazine
+    Kaleidocast Magazine
   </p>
   `
 }).then(console.log)

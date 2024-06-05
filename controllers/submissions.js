@@ -51,7 +51,7 @@ const updateSubmission = async (req, res) => {
 
   const sender = {
     email: 'editor@havenspec.com',
-    name: 'Haven Spec Magazine'
+    name: 'Kaleidocast Magazine'
   };
 
   const submitterReceivers = [{ email: submission.email }];
@@ -90,15 +90,14 @@ const updateSubmission = async (req, res) => {
       sendEmail({
         sender,
         to: submitterReceivers,
-        subject: 'Re: Submission to Haven Spec Magazine',
+        subject: 'Re: Submission to Kaleidocast Magazine',
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
+          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Kaleidocast Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
           <p>{{params.readerNote}} That's just our subjective opinion, of course, but we appreciated the chance to look at your work, and we hope you send us more.</p>
-          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
+          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Kaleidocast Magazine</p>
           <br />
-          <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
         `
       });
 
@@ -109,14 +108,13 @@ const updateSubmission = async (req, res) => {
       sendEmail({
         sender,
         to: submitterReceivers,
-        subject: 'Re: Submission to Haven Spec Magazine',
+        subject: 'Re: Submission to Kaleidocast Magazine',
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
-          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
+          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Kaleidocast Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
+          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Kaleidocast Magazine</p>
           <br />
-          <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
         `
       });
 
@@ -127,14 +125,13 @@ const updateSubmission = async (req, res) => {
       sendEmail({
         sender,
         to: submitterReceivers,
-        subject: 'Re: Submission to Haven Spec Magazine',
+        subject: 'Re: Submission to Kaleidocast Magazine',
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
-          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
+          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Kaleidocast Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
+          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Kaleidocast Magazine</p>
           <br />
-          <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
         `
       });
 
@@ -145,12 +142,12 @@ const updateSubmission = async (req, res) => {
       sendEmail({
         sender,
         to: submitterReceivers,
-        subject: 'Re: Submission to Haven Spec Magazine',
+        subject: 'Re: Submission to Kaleidocast Magazine',
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
-          <p>Sincerely, <br />The Haven Spec Team</p>
+          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Kaleidocast Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
+          <p>Sincerely, <br />The Kaleidocast Team</p>
           <br />
         `
       });
@@ -163,7 +160,7 @@ const updateSubmission = async (req, res) => {
         subject: 'Reader Recommendation: ' + submission.name + ' - ' + submission.title,
         params: commonParams,
         htmlContent: `
-          <h4>Haven Spec Magazine</h4> 
+          <h4>Kaleidocast Magazine</h4> 
           <p><strong>Recommendation: </strong></p>
           <p><strong>Title:</strong> {{params.title}}<br /><strong>Author:</strong> {{params.submitterName}}</p>
           <p><strong>Reader:</strong> {{params.readerName}}</p>
@@ -174,14 +171,13 @@ const updateSubmission = async (req, res) => {
       const secondEmail = {
         sender,
         to: submitterReceivers,
-        subject: 'Re: Submission to Haven Spec Magazine',
+        subject: 'Re: Submission to Kaleidocast Magazine',
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. This is just a quick note to say that it has been held for further consideration. You should hear from us again in the next couple months.</p>
-          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
+          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Kaleidocast Magazine. This is just a quick note to say that it has been held for further consideration. You should hear from us again in the next couple months.</p>
+          <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Kaleidocast Magazine</p>
           <br />
-          <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
         `
       };
 

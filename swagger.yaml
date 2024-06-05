@@ -4,7 +4,7 @@ info:
   contact: {}
   version: '1.0'
 servers:
-  - url: https://acolyte-submissions-api.herokuapp.com/api/v1
+  - url: 
     variables: {}
 paths:
   /auth/add-reader:

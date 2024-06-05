@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 });
 
 const corsOrigin ={
-  origin: 'http://localhost:3000', 
+  origin: 'http://localhost', 
   credentials:true,            
   optionSuccessStatus:200
 }
