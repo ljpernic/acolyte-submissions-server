@@ -7,19 +7,19 @@ servers:
   - url: https://acolyte-submissions-api.herokuapp.com/api/v1
     variables: {}
 paths:
-  /auth/delegate:
+  /auth/add-reader:
     post:
       tags:
         - Auth
-      summary: To delegate submissions to other readers.
-      operationId: Delegate
+      summary: To add readers.
+      operationId: AddReader
       parameters: []
       requestBody:
         description: ''
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DelegateRequest'
+              $ref: '#/components/schemas/AddReaderRequest'
             example:
               name: bob
               email: bob@gmail.com
@@ -141,8 +141,8 @@ paths:
       deprecated: false
 components:
   schemas:
-    DelegateRequest:
-      title: DelegateRequest
+    AddReaderRequest:
+      title: AddReaderRequest
       required:
         - name
         - email

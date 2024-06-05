@@ -7,7 +7,7 @@ const { BadRequestError, UnauthenticatedError } = require('../errors')          
 const jwt = require('jsonwebtoken')                                                     // Makes jwt package available for creating json web tokens. 
 
 // REGISTRATION FUNCTION  -- SHOULD ONLY BE AVAILABLE TO TOP LEVEL EDITOR // 
-const delegate = async (req, res) => {
+const addReader = async (req, res) => {
   try {
     const reader = await Reader.create({ ...req.body });
     const newEmail = reader.email;
@@ -129,7 +129,7 @@ const passwordChange = async (req, res) => {
 //
 //
 module.exports = { 
-  delegate,
+  addReader,
   login,
   passwordChange,
 }
