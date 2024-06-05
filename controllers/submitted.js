@@ -68,3 +68,47 @@ tranEmailApi.sendTransacEmail({
 module.exports = {
   createSubmitted,
 }
+
+
+//// For server-side uploading, this function almost completely worked.
+// const createUpload = async (req, res) => {
+//   try {
+//     console.log('File: ', req.file);
+//     console.log('Body: ', req.body);
+
+//     const file = req.file;
+//     const email = req.body.email;
+
+//     // Forward the file to Google Drive
+//     const response = await axios.post(
+//       'https://script.google.com/macros/s/AKfycbztsfxR4O0TaqonWsKax5Mqwunm-s2wYg7iKdLnKYUhlbif1IvApqq_7jZvTJsg0v3g/exec',
+//       {
+//         dataReq: {
+//           data: file.buffer.toString('base64'), // Convert file buffer to base64 string
+//           name: file.originalname,
+//           email: email,
+//           type: file.mimetype
+//         },
+//         fname: "uploadFilesToGoogleDrive"
+//       },
+//       {
+//         headers: {
+//           'Content-Type': 'application/json'
+//         }
+//       }
+//     );
+
+//     // Check if the request was successful
+//     if (response.status === 200) {
+//       // Forward the response from Google Drive to the client
+//       res.json(response.data);
+//     } else {
+//       // Handle the error response from Google Drive
+//       res.status(response.status).json({ error: 'Failed to upload file to Google Drive' });
+//     }
+//   } catch (error) {
+//     // Handle any unexpected errors
+//     console.error('Error uploading file:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };

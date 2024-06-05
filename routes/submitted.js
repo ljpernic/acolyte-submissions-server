@@ -13,3 +13,29 @@ router.route('/').post(createSubmitted)                               // the '/'
                                                                                               //// and use the given controller inside the given route.
 
 module.exports = router                                                                       // Makes the router available for other files.
+
+
+
+
+//// For server-side uploading, this was our route:
+////
+// const express = require('express');
+// const router = express.Router();
+// const multer = require('multer');
+
+// // Set up Multer storage configuration
+// const storage = multer.memoryStorage(); // Use memory storage for parsing files
+// const upload = multer({ storage: storage });
+
+// const { createSubmitted, createUpload } = require('../controllers/submitted');
+
+// router.route('/').post(createSubmitted);
+
+// router.route('/upload').post(upload.single('file'), (req, res, next) => {
+//   console.log('Multer middleware hit');
+//   console.log('File received: ', req.file);
+//   console.log('Body: ', req.body);
+//   next();
+// }, createUpload); // Use Multer middleware to handle file upload
+
+// module.exports = router;
