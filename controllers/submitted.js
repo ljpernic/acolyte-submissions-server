@@ -1,114 +1,115 @@
-const Submissions = require('../models/Submissions')                                      // Makes available the schema defined in models/Submissions.js
-const { StatusCodes } = require('http-status-codes')                                    // Makes easy status codes from http-status-code package available.
-const { BadRequestError, UnauthenticatedError } = require('../errors')                  // Makes these extra errors available.
+const Submissions = require('../models/Submissions');
+const { StatusCodes } = require('http-status-codes');
+const Sib = require('sib-api-v3-sdk');
+const fs = require('fs');
+const path = require('path');
+const fetch = require('node-fetch');
+require('dotenv').config();
 
-const Sib = require('sib-api-v3-sdk')
-const { listenerCount } = require('multer-gridfs-storage')
-require('dotenv').config()
+const client = Sib.ApiClient.instance;
+const apiKey = client.authentications['api-key'];
+apiKey.apiKey = process.env.EMAIL_KEY;
 
-const client = Sib.ApiClient.instance
-const apiKey = client.authentications['api-key']
-apiKey.apiKey = process.env.EMAIL_KEY
-
-
-// FUNCTION TO CREATE NEW SUBMISSION //
 const createSubmitted = async (req, res) => {
-  const submitted = await Submissions.create(req.body)                       // Creates submission array using Role/Submission.js scheme. )
-  const submission = submitted;
-//  console.log(`Is this invoked? ` + JSON.stringify(req.body))
-  const tranEmailApi = new Sib.TransactionalEmailsApi()
+  try {
+    const { name, email, title, type, wordCount, coverLetter } = req.body;
+    const file = req.file;
 
-  // SET UP DEADLINE PART OF EMAIL
-  const month = ["March","April","May","June","July","August","September","October","November","December", "January", "February"];
-  const currentDate = new Date();
-  let deadlineMonth = month[currentDate.getMonth()];
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
 
-  // SET UP EMAIL DETAILS
-  const sender = {
-    email: 'editor@havenspec.com',
-    name: 'Haven Spec Magazine'
+    // Renaming the file based on submission details
+    const submitDate = new Date();
+    const submitYear = submitDate.getFullYear();
+    const submitMonth = String(submitDate.getMonth() + 1).padStart(2, '0');
+    const submitDay = String(submitDate.getDate()).padStart(2, '0');
+    const submitTitle = title.length <= 50 ? title : title.slice(0, 49);
+    const submitName = name.length <= 50 ? name : name.slice(0, 49);
+    const typeLetter = type === 'fiction' ? 'F' : type === 'poetry' ? 'P' : type === 'non-fiction' ? 'N' : 'UNK';
+    const newFileName = `${submitYear}-${submitMonth}-${submitDay} - ${typeLetter} - ${submitName} - ${submitTitle}`;
+
+    // Rename the file
+    const filePath = path.join(__dirname, '../uploads/', file.filename);
+    const newFilePath = path.join(__dirname, '../uploads/', newFileName + path.extname(file.originalname));
+    fs.renameSync(filePath, newFilePath);
+
+    // Prepare the file for uploading to Google Drive
+    const fileBlob = fs.readFileSync(newFilePath);
+    const base64File = fileBlob.toString('base64');
+
+    const dataSend = {
+      dataReq: {
+        data: base64File,
+        name: newFileName,
+        type: file.mimetype
+      },
+      fname: 'uploadFilesToGoogleDrive'
+    };
+
+    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbz6aTpdrZNxgdgKsZPjiG0dSRWzUGPrSJ0dW89ub_LYeNOJko6OAWi_cid7QPG5z0NU/exec';
+
+    const response = await fetch(googleScriptUrl, {
+      method: 'POST',
+      body: JSON.stringify(dataSend),
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'An error occurred while uploading the file');
+    }
+
+    // Save the submission to MongoDB
+    const submission = await Submissions.create({
+      name,
+      email,
+      title,
+      type,
+      wordCount,
+      coverLetter,
+      file: result.url
+    });
+
+    console.log('File uploaded successfully:', result);
+    fs.unlinkSync(newFilePath); // Remove the file from the server after upload
+
+    // Send email confirmation
+    const tranEmailApi = new Sib.TransactionalEmailsApi();
+    const month = ["March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"];
+    const currentDate = new Date();
+    const deadlineMonth = month[currentDate.getMonth()];
+    const sender = { email: 'editor@havenspec.com', name: 'Haven Spec Magazine' };
+    const receivers = [{ email }];
+
+    await tranEmailApi.sendTransacEmail({
+      sender,
+      to: receivers,
+      subject: 'Thank you for your submission to Haven Spec Magazine',
+      params: {
+        name,
+        title,
+        deadline: deadlineMonth,
+      },
+      htmlContent: `
+        <p>Dear {{params.name}},</p>
+        <p>Thank you for submitting to Haven Spec Magazine. You should hear back 
+        from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
+        out at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and 
+        on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>!</p>
+        <p>Sincerely, <br />
+        Haven Spec Magazine</p>
+      `
+    });
+
+    res.status(StatusCodes.CREATED).json({ submission });
+  } catch (error) {
+    console.error('Error processing submission:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'An error occurred while processing your submission' });
   }
-
-  const receivers = [
-    {
-      email: req.body.email,
-    },
-  ]
-
-// SEND EMAIL
-tranEmailApi.sendTransacEmail({
-  sender, 
-  to: receivers,
-  subject: 'Thank you for your submission to Haven Spec Magazine',
-  params: {
-    name: req.body.name,
-    title: req.body.title,
-    deadline: deadlineMonth, 
-  },
-  htmlContent:`
-  <p> 
-    Dear {{params.name}},
-  </p>
-  <p>
-    Thank you for submitting to Haven Spec Magazine. You should hear back 
-    from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
-    out at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and 
-    on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>!
-  </p>
-  <p> 
-    Sincerely, <br />
-    Haven Spec Magazine
-  </p>
-  `
-}).then(console.log)
-.catch(console.log)
-  res.status(StatusCodes.CREATED).json({ submission })
-}
+};
 
 module.exports = {
   createSubmitted,
-}
-
-
-//// For server-side uploading, this function almost completely worked.
-// const createUpload = async (req, res) => {
-//   try {
-//     console.log('File: ', req.file);
-//     console.log('Body: ', req.body);
-
-//     const file = req.file;
-//     const email = req.body.email;
-
-//     // Forward the file to Google Drive
-//     const response = await axios.post(
-//       'https://script.google.com/macros/s/AKfycbztsfxR4O0TaqonWsKax5Mqwunm-s2wYg7iKdLnKYUhlbif1IvApqq_7jZvTJsg0v3g/exec',
-//       {
-//         dataReq: {
-//           data: file.buffer.toString('base64'), // Convert file buffer to base64 string
-//           name: file.originalname,
-//           email: email,
-//           type: file.mimetype
-//         },
-//         fname: "uploadFilesToGoogleDrive"
-//       },
-//       {
-//         headers: {
-//           'Content-Type': 'application/json'
-//         }
-//       }
-//     );
-
-//     // Check if the request was successful
-//     if (response.status === 200) {
-//       // Forward the response from Google Drive to the client
-//       res.json(response.data);
-//     } else {
-//       // Handle the error response from Google Drive
-//       res.status(response.status).json({ error: 'Failed to upload file to Google Drive' });
-//     }
-//   } catch (error) {
-//     // Handle any unexpected errors
-//     console.error('Error uploading file:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
+};

@@ -39,7 +39,7 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
       max: [6000, 'Max story length is 6000 words'],
     },
     file: {
-      type: Buffer,
+      type: String,
       required: [true, 'Please upload a file'],
     },
     coverLetter: {

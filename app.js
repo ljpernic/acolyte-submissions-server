@@ -62,6 +62,7 @@ app.use(cors(corsOrigin));
 app.use(xss());
 
 // ROUTES //
+app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/submitted', submittedRouter);                                    // Where the req.body shows itself; second thing is the routes file required above
 app.use('/api/v1/submissions', authReader, submissionsRouter);                                    // Where the req.body shows itself; second thing is the routes file required above
 app.use('/api/v1/auth', authRouter);                                            // Assigns the authRouter functions and post methods to this route.
