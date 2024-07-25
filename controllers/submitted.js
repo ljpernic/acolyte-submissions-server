@@ -19,35 +19,35 @@ const createSubmitted = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded.' });
     }
 
-    // Renaming the file based on submission details
-    const submitDate = new Date();
-    const submitYear = submitDate.getFullYear();
-    const submitMonth = String(submitDate.getMonth() + 1).padStart(2, '0');
-    const submitDay = String(submitDate.getDate()).padStart(2, '0');
-    const submitTitle = title.length <= 50 ? title : title.slice(0, 49);
-    const submitName = name.length <= 50 ? name : name.slice(0, 49);
-    const typeLetter = type === 'fiction' ? 'F' : type === 'poetry' ? 'P' : type === 'non-fiction' ? 'N' : 'UNK';
-    const newFileName = `${submitYear}-${submitMonth}-${submitDay} - ${typeLetter} - ${submitName} - ${submitTitle}`;
-
-    // Rename the file
+    // Directly use the original file path
     const filePath = path.join(__dirname, '../uploads/', file.filename);
-    const newFilePath = path.join(__dirname, '../uploads/', newFileName + path.extname(file.originalname));
-    fs.renameSync(filePath, newFilePath);
+    const newFilePath = filePath;  // No renaming
+
+    console.log('File path:', filePath);
+    console.log('New file path:', newFilePath);
+
+    // Check if file exists before proceeding
+    if (fs.existsSync(filePath)) {
+      console.log('File exists:', filePath);
+    } else {
+      console.error('File not found:', filePath);
+      return res.status(500).json({ message: 'File not found.' });
+    }
 
     // Prepare the file for uploading to Google Drive
-    const fileBlob = fs.readFileSync(newFilePath);
+    const fileBlob = fs.readFileSync(filePath);
     const base64File = fileBlob.toString('base64');
 
     const dataSend = {
       dataReq: {
         data: base64File,
-        name: newFileName,
+        name: file.originalname,
         type: file.mimetype
       },
       fname: 'uploadFilesToGoogleDrive'
     };
 
-    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbz6aTpdrZNxgdgKsZPjiG0dSRWzUGPrSJ0dW89ub_LYeNOJko6OAWi_cid7QPG5z0NU/exec';
+    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbxmYTZlykO8th3ZLiVTzmjMh-UruauRjK4yuaqypgwhOvK8OBxCBd4vNUYFjAFKcjnP/exec';
 
     const response = await fetch(googleScriptUrl, {
       method: 'POST',
@@ -73,7 +73,7 @@ const createSubmitted = async (req, res) => {
     });
 
     console.log('File uploaded successfully:', result);
-    fs.unlinkSync(newFilePath); // Remove the file from the server after upload
+    fs.unlinkSync(filePath); // Remove the file from the server after upload
 
     // Send email confirmation
     const tranEmailApi = new Sib.TransactionalEmailsApi();
@@ -110,6 +110,4 @@ const createSubmitted = async (req, res) => {
   }
 };
 
-module.exports = {
-  createSubmitted,
-};
+module.exports = { createSubmitted };
