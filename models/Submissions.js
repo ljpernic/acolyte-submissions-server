@@ -49,8 +49,8 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
       maxlength: [3000],
     },
     reader: {
-      type: String,
-      default: 'unclaimed',                                // As bananas are added, they won't have a reader by default
+      type: [String],
+      default: ['unclaimed'],                                // As bananas are added, they won't have a reader by default
       required: [true],
     },
     readerNote: {
@@ -88,6 +88,11 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
       required: [true, 'Is this submission still active? There was an error. '],
       default: true,
     },
+    feedback: {
+      type: Boolean,
+      required: [true, 'Was feedback requested? There was an error. '],
+      default: false,
+    },
   },
   { timestamps: true }                                                          // This automatically adds the timestamp.
 )
@@ -97,65 +102,5 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
 //    console.log('allReaders: ' + allReaders)
  })
 
-// // ////// FUNCTION TO GET AND ASSIGN ACTIVE READERS //////
-
-// // // Gets all readers, active or not //
-//  SubmissionSchema.pre('save', async function () { 
-//    const allReaders = await Reader.find()
-
-// // // Filters those readers to only active readers // 
-//    var eligibleReaders = allReaders.filter(function(readerData) {                // Filters all readers by isActive and current story counts.
-//      return readerData.isActive === true && 
-//        readerData.weekCount < 10 && 
-//        readerData.periodCount < 80;                                              // Creates a new array with only the eligible readers.
-//    });
-
-//    if ( eligibleReaders.length < 1 ) {
-//      return
-//      }
-// // // Finds the lowest current weekCount among eligibleReaders //
-//    var lowestWeekCountReaders = eligibleReaders.reduce(function(res, obj) { 
-//      return (obj.weekCount < res.weekCount) ? obj : res;
-//    });
-
-// // // Creates an array of readers with lowest current weekCount //
-//    var lowestWeekCount = lowestWeekCountReaders.weekCount                        // Assigned the numerical value to a var to use for filter params.
-//    var assignedReaders = eligibleReaders.filter(function(assignedReaderData) {   // Filters all readers by those with lowest week count.
-//      return assignedReaderData.weekCount === lowestWeekCount                     // Creates array assignedReaders, who should have lowest week count.
-//    });
-// //console.log(`server/models/Submissions.js, assignedReaders before the if: ` + assignedReaders)
-//    if ( assignedReaders.length === 1 ) {
-//     var individualReader = assignedReaders; 
-//  //   console.log(`server/models/Submissions.js, assignedReaders for 1 reader: ` + assignedReaders)
-//  //   console.log(`server/models/Submissions.js, individualReader for 1 reader: ` + individualReader)
-//    } 
-//    else {
-// // mini-function to randomize the assignedReaders array //
-//      var readerIndex = assignedReaders.length, randomIndex;
-//        while (readerIndex != 0) {                                              // While there remain elements to shuffle...
-//          randomIndex = Math.floor(Math.random() * readerIndex);                // Pick one of the remaining elements...
-//          readerIndex--;
-//        [assignedReaders[readerIndex], assignedReaders[randomIndex]] = [                // And swap it with the current element.
-//          assignedReaders[randomIndex], assignedReaders[readerIndex]];
-//        }
-//      }
-//    var individualReader = assignedReaders[0]
-//    var readerId = individualReader._id
-
-//    Reader.findByIdAndUpdate(readerId, { weekCount: individualReader.weekCount + 1, periodCount: individualReader.periodCount + 1, totalCount: individualReader.totalCount + 1 },
-//      function (err, docs) {
-//        if (err){
-//            console.log(err)
-//        }
-//        else{
-//            console.log("Updated " + docs.name +"'s counts by one. ");
-//        }
-//      });
-
-//    this.reader = readerId
-//    individualReader.weekCount === individualReader.weekCount + 1 
-
-//  })
-
-module.exports = mongoose.model('Submission', SubmissionSchema)         // First parameter is the name given the function that creates individual collections. 
+module.exports = mongoose.model('Submissions', SubmissionSchema)         // First parameter is the name given the function that creates individual collections. 
                                                                         //// Second is the schema itself.

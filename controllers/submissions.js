@@ -10,7 +10,9 @@ const getAllSubmissionsStatic = async (req, res) => {
 };
 
 const getAllSubmissions = async (req, res) => {
-  const submissions = await Submissions.find({ reader: { $in: [req.reader.readerId, "unclaimed"] } }).sort('createdAt');
+  const submissions = await Submissions.find({
+    reader: { $in: [req.reader.readerId, "unclaimed"] }, // Check for readerId or "unclaimed"
+  }).sort("createdAt");
   res.status(StatusCodes.OK).json({ submissions, count: submissions.length });
 };
 
@@ -94,7 +96,7 @@ const updateSubmission = async (req, res) => {
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
+          <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. Unfortunately, we've decided to pass on this piece, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
           <p>{{params.readerNote}} That's just our subjective opinion, of course, but we appreciated the chance to look at your work, and we hope you send us more.</p>
           <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
           <br />
@@ -113,7 +115,7 @@ const updateSubmission = async (req, res) => {
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
+          <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. Unfortunately, we've decided to pass on this piece, but we wish you the best of luck on your writing and publishing endeavors. We would be happy to consider anything else you might write!</p>
           <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
           <br />
           <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
@@ -131,7 +133,7 @@ const updateSubmission = async (req, res) => {
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
+          <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. Unfortunately, we've decided to pass on this piece, but we wish you the best of luck on your writing and publishing endeavors.</p>
           <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
           <br />
           <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
@@ -149,7 +151,7 @@ const updateSubmission = async (req, res) => {
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. Unfortunately, we've decided to pass on this one, but we wish you the best of luck on your writing and publishing endeavors.</p>
+          <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. Unfortunately, we've decided to pass on this piece, but we wish you the best of luck on your writing and publishing endeavors.</p>
           <p>Sincerely, <br />The Haven Spec Team</p>
           <br />
         `
@@ -178,13 +180,14 @@ const updateSubmission = async (req, res) => {
         params: commonParams,
         htmlContent: `
           <p>Dear {{params.submitterName}},</p>
-          <p>Thank you for the submission of your {{params.type}} "{{params.title}}" to Haven Spec Magazine. This is just a quick note to say that it has been held for further consideration. You should hear from us again in the next couple months.</p>
+          <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. This is just a quick note to say that it has been held for further consideration. You should hear from us again in the next couple months.</p>
           <p>Sincerely, <br />{{params.readerName}}, {{params.role}}<br />Haven Spec Magazine</p>
           <br />
           <p>Find us on the web at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>.</p>
         `
       };
 
+      await Submissions.updateOne({ "_id": submission._id }, { $addToSet: { "reader": "665e79f3c669126a38360bd5" } });
       await Promise.all([sendEmail(firstEmail), sendEmail(secondEmail)]);
       res.status(StatusCodes.OK).json({ submission });
     } else {

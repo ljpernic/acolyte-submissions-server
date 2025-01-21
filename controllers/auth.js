@@ -75,7 +75,7 @@ const login = async (req, res) => {
       }
     );
 
-    res.status(StatusCodes.OK).json({ reader: { name: reader.name, readerId: reader._id }, token });
+    res.status(StatusCodes.OK).json({ reader: { name: reader.name, readerId: reader._id, role: reader.role }, token });
   } catch (error) {
     console.error('Login error:', error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Please check the login details and try again.' });

@@ -47,7 +47,7 @@ const createSubmitted = async (req, res) => {
       fname: 'uploadFilesToGoogleDrive'
     };
 
-    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbxmYTZlykO8th3ZLiVTzmjMh-UruauRjK4yuaqypgwhOvK8OBxCBd4vNUYFjAFKcjnP/exec';
+    const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbxDD3SUYEEuAYPhuq_R1DvohvYkAyvsSQ4RLGQ7daZj271tMhxcmmv_GWmrSYXR2o2I/exec';
 
     const response = await fetch(googleScriptUrl, {
       method: 'POST',
@@ -73,9 +73,12 @@ const createSubmitted = async (req, res) => {
     });
 
     console.log('File uploaded successfully:', result);
-    fs.unlinkSync(filePath); // Remove the file from the server after upload
 
-    // Send email confirmation
+    // Delete the local file after successful upload to Google Drive
+    fs.unlinkSync(filePath);
+    console.log('Local file deleted:', filePath);
+
+    // Send email confirmation -- IS THIS NOT GETTING USED?
     const tranEmailApi = new Sib.TransactionalEmailsApi();
     const month = ["March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"];
     const currentDate = new Date();
@@ -86,7 +89,7 @@ const createSubmitted = async (req, res) => {
     await tranEmailApi.sendTransacEmail({
       sender,
       to: receivers,
-      subject: 'Thank you for your submission to Haven Spec Magazine',
+      subject: 'Submission to Haven Spec Magazine — {{params.title}}',
       params: {
         name,
         title,
@@ -94,12 +97,14 @@ const createSubmitted = async (req, res) => {
       },
       htmlContent: `
         <p>Dear {{params.name}},</p>
-        <p>Thank you for submitting to Haven Spec Magazine. You should hear back 
+        <p>Thank you for your submission of {{params.title}} to Haven Spec Magazine. You should hear back 
         from us by the end of {{params.deadline}}, but in the meantime, don't forget to check us 
         out at <a href="https://www.havenspec.com">havenspec.com</a>, on Twitter <a href="https://www.twitter.com/HavenSpec">@HavenSpec</a>, and 
-        on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@havenspec.bsky.social</a>!</p>
+        on Bluesky <a href="https://bsky.app/profile/havenspec.bsky.social">@HavenSpec.bsky.social</a>!</p>
         <p>Sincerely, <br />
         Haven Spec Magazine</p>
+
+        <Note: Server-side code.>
       `
     });
 

@@ -50,7 +50,8 @@ app.use((req, res, next) => {
 });
 
 const corsOrigin ={
-  origin: 'http://localhost:3000', 
+  origin: 'http://localhost:3000',
+  //origin: 'https://acolyte.media', 
   credentials:true,            
   optionSuccessStatus:200
 }
@@ -77,8 +78,8 @@ if (port == null || port == "") {
 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URI);                                     //// Starts the server by connecting to the database based on the info in the .env file.
-    app.listen(port, () =>
+    await connectDB(process.env.MONGO_URI); // Starts the server by connecting to the database based on the info in the .env file.
+    app.listen(port, '0.0.0.0', () =>
       console.log(`Server is listening on port ${port}...`)
     );
   } catch (error) {
