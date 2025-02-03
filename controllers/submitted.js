@@ -12,7 +12,7 @@ apiKey.apiKey = process.env.EMAIL_KEY;
 
 const createSubmitted = async (req, res) => {
   try {
-    const { name, email, title, type, wordCount, coverLetter } = req.body;
+    const { name, email, title, type, wordCount, feedback, coverLetter } = req.body;
     const file = req.file;
 
     if (!file) {
@@ -68,6 +68,7 @@ const createSubmitted = async (req, res) => {
       title,
       type,
       wordCount,
+      feedback,
       coverLetter,
       file: result.url
     });

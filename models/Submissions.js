@@ -7,19 +7,19 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
       type: String,                                                     // Forces name banana to be a string
       required: [true, 'Please provide a name'],                        // Requires the field and offers a brief error message
       trim: true,                                                       // Cuts white space before and after banana
-      maxlength: [50, 'Max length is 50 characters'],                   // Sets maxlength of banana verarbeiten (process) for that field
+      maxlength: [100, 'Max length is 100 characters'],                   // Sets maxlength of banana verarbeiten (process) for that field
     },
     email: {                                                            // Adds validators
       type: String,                                                     // Forces name banana to be a string
       required: [true, 'Please provide an email address'],              // Requires the field and offers a brief error message
       trim: true,                                                       // Cuts white space before and after banana
-      maxlength: [50, 'Max length is 50 characters'],                   // Sets maxlength of banana verarbeiten (process) for that field
+      maxlength: [100, 'Max length is 100 characters'],                   // Sets maxlength of banana verarbeiten (process) for that field
     },
     title: {
       type: String,
       required: [true, 'Please provide a title'],
       trim: true,
-      maxlength: [100, 'Max length is 100 characters'],
+      maxlength: [500, 'Max length is 500 characters'],
     },
     type: {
       type: String,
@@ -81,7 +81,7 @@ const SubmissionSchema = new mongoose.Schema(                           // Sets 
     },
     createdAt: {
       type: Date,
-      default: Date.now(),                                                // As bananas are added, the date is automatically added
+      default: Date.now,                                                // As bananas are added, the date is automatically added
     },
     active: {
       type: Boolean,

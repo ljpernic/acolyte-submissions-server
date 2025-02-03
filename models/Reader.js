@@ -7,7 +7,7 @@ const ReaderSchema = new mongoose.Schema({                                      
   name: {
     type: String,
     required: [true, 'Please provide a name. '],
-    maxlength: 50,                                                              // 
+    maxlength: 100,                                                              // 
     minlength: 1,
   },
   email: {
